@@ -40,6 +40,14 @@ if(CORROSION_TESTS_INSTALL_CORROSION)
     set_tests_properties("output_directory_build" PROPERTIES FIXTURES_REQUIRED "fixture_corrosion_install")
 endif()
 
+get_cmake_property(IS_MULTI_CONFIG GENERATOR_IS_MULTI_CONFIG)
+
+if (IS_MULTI_CONFIG)
+    set(config_path_str "$<CONFIG>/")
+else()
+    set(config_path_str "")
+endif()
+
 foreach(output_approach targetprop var targetprop_pdb_fallback)
     if(output_approach STREQUAL "targetprop")
        set(rust_proj_suffix "1")
@@ -56,8 +64,8 @@ foreach(output_approach targetprop var targetprop_pdb_fallback)
     add_test(NAME output_directory_bin_${output_approach}
             COMMAND
             "${CMAKE_COMMAND}"
-            -P "${CMAKE_CURRENT_SOURCE_DIR}/TestFileExists.cmake"
-            "${CMAKE_CURRENT_BINARY_DIR}/build/custom_bin_${output_approach}/${bin_name}"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/../TestFileExists.cmake"
+            "${CMAKE_CURRENT_BINARY_DIR}/build/custom_bin_${output_approach}/${config_path_str}${bin_name}"
     )
     set_tests_properties("output_directory_bin_${output_approach}" PROPERTIES FIXTURES_REQUIRED "build_fixture_output_directory")
 
@@ -68,8 +76,8 @@ foreach(output_approach targetprop var targetprop_pdb_fallback)
     add_test(NAME output_directory_staticlib_${output_approach}
             COMMAND
             "${CMAKE_COMMAND}"
-            -P "${CMAKE_CURRENT_SOURCE_DIR}/TestFileExists.cmake"
-            "${CMAKE_CURRENT_BINARY_DIR}/build/custom_archive_${output_approach}/${static_lib_name}"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/../TestFileExists.cmake"
+            "${CMAKE_CURRENT_BINARY_DIR}/build/custom_archive_${output_approach}/${config_path_str}${static_lib_name}"
     )
     set_tests_properties("output_directory_staticlib_${output_approach}" PROPERTIES FIXTURES_REQUIRED "build_fixture_output_directory")
 
@@ -84,8 +92,8 @@ foreach(output_approach targetprop var targetprop_pdb_fallback)
     add_test(NAME output_directory_cdylib_${output_approach}
             COMMAND
             "${CMAKE_COMMAND}"
-            -P "${CMAKE_CURRENT_SOURCE_DIR}/TestFileExists.cmake"
-            "${CMAKE_CURRENT_BINARY_DIR}/build/custom_lib_${output_approach}/${dynamic_lib_name}"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/../TestFileExists.cmake"
+            "${CMAKE_CURRENT_BINARY_DIR}/build/custom_lib_${output_approach}/${config_path_str}${dynamic_lib_name}"
     )
     set_tests_properties("output_directory_cdylib_${output_approach}" PROPERTIES FIXTURES_REQUIRED "build_fixture_output_directory")
 
@@ -95,10 +103,10 @@ foreach(output_approach targetprop var targetprop_pdb_fallback)
         add_test(NAME output_directory_implib_${output_approach}
             COMMAND
             "${CMAKE_COMMAND}"
-            -P "${CMAKE_CURRENT_SOURCE_DIR}/TestFileExists.cmake"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/../TestFileExists.cmake"
             # Implib is an ARCHIVE artifact, see:
             # https://cmake.org/cmake/help/v3.25/manual/cmake-buildsystem.7.html#archive-output-artifacts
-            "${CMAKE_CURRENT_BINARY_DIR}/build/custom_archive_${output_approach}/${implib_name}"
+            "${CMAKE_CURRENT_BINARY_DIR}/build/custom_archive_${output_approach}/${config_path_str}${implib_name}"
             )
         set_tests_properties("output_directory_implib_${output_approach}" PROPERTIES FIXTURES_REQUIRED "build_fixture_output_directory")
 
@@ -122,8 +130,8 @@ foreach(output_approach targetprop var targetprop_pdb_fallback)
             add_test(NAME output_directory_cdylib_pdb_${output_approach}
                 COMMAND
                 "${CMAKE_COMMAND}"
-                -P "${CMAKE_CURRENT_SOURCE_DIR}/TestFileExists.cmake"
-                "${CMAKE_CURRENT_BINARY_DIR}/build/${expected_lib_pdb_path}/${lib_pdb_name}"
+                -P "${CMAKE_CURRENT_SOURCE_DIR}/../TestFileExists.cmake"
+                "${CMAKE_CURRENT_BINARY_DIR}/build/${expected_lib_pdb_path}/${config_path_str}${lib_pdb_name}"
                 )
             set_tests_properties("output_directory_cdylib_pdb_${output_approach}" PROPERTIES FIXTURES_REQUIRED "build_fixture_output_directory")
 
@@ -131,8 +139,8 @@ foreach(output_approach targetprop var targetprop_pdb_fallback)
             add_test(NAME output_directory_bin_pdb_${output_approach}
                 COMMAND
                 "${CMAKE_COMMAND}"
-                -P "${CMAKE_CURRENT_SOURCE_DIR}/TestFileExists.cmake"
-                "${CMAKE_CURRENT_BINARY_DIR}/build/${expected_bin_pdb_path}/${bin_pdb_name}"
+                -P "${CMAKE_CURRENT_SOURCE_DIR}/../TestFileExists.cmake"
+                "${CMAKE_CURRENT_BINARY_DIR}/build/${expected_bin_pdb_path}/${config_path_str}${bin_pdb_name}"
                 )
             set_tests_properties("output_directory_bin_pdb_${output_approach}" PROPERTIES FIXTURES_REQUIRED "build_fixture_output_directory")
         endif()
@@ -143,7 +151,7 @@ endforeach()
 add_test(NAME postbuild_custom_command
     COMMAND
     "${CMAKE_COMMAND}"
-    -P "${CMAKE_CURRENT_SOURCE_DIR}/TestFileExists.cmake"
+    -P "${CMAKE_CURRENT_SOURCE_DIR}/../TestFileExists.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/build/another_dir/moved_bin"
     )
 set_tests_properties("postbuild_custom_command" PROPERTIES FIXTURES_REQUIRED "build_fixture_output_directory")
