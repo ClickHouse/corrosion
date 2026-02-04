@@ -737,13 +737,21 @@ function(_add_cargo_build out_cargo_build_out_dir)
     # We set a target folder based on the manifest path so if you build multiple workspaces (or standalone projects
     # without workspace) they won't collide if they use a common dependency. This would confuse cargo and trigger
     # unnecessary rebuilds
-    cmake_path(GET workspace_manifest_path PARENT_PATH parent_path)
-    cmake_path(GET parent_path PARENT_PATH grandparent_path)
-    string(REPLACE "${grandparent_path}/" "" cargo_folder_name "${parent_path}")
-    string(SHA1 cargo_path_hash ${workspace_manifest_path})
-    # Include a hash of the full path in case there are multiple projects with the same folder name
-    string(SUBSTRING "${cargo_path_hash}" 0 5 cargo_path_hash)
-    set(cargo_target_dir "${CMAKE_BINARY_DIR}/${build_dir}/cargo/build/${cargo_folder_name}_${cargo_path_hash}")
+    #
+    # However, if CORROSION_SHARED_CARGO_TARGET_DIR is set, we use that instead to allow sharing
+    # compiled dependencies across multiple crates. This is useful when you have multiple independent
+    # crates that share common dependencies - they can reuse the compiled artifacts.
+    if(DEFINED CORROSION_SHARED_CARGO_TARGET_DIR)
+        set(cargo_target_dir "${CORROSION_SHARED_CARGO_TARGET_DIR}")
+    else()
+        cmake_path(GET workspace_manifest_path PARENT_PATH parent_path)
+        cmake_path(GET parent_path PARENT_PATH grandparent_path)
+        string(REPLACE "${grandparent_path}/" "" cargo_folder_name "${parent_path}")
+        string(SHA1 cargo_path_hash ${workspace_manifest_path})
+        # Include a hash of the full path in case there are multiple projects with the same folder name
+        string(SUBSTRING "${cargo_path_hash}" 0 5 cargo_path_hash)
+        set(cargo_target_dir "${CMAKE_BINARY_DIR}/${build_dir}/cargo/build/${cargo_folder_name}_${cargo_path_hash}")
+    endif()
     set(cargo_build_dir "${cargo_target_dir}/${target_artifact_dir}/${build_type_dir}")
     set("${out_cargo_build_out_dir}" "${cargo_build_dir}" PARENT_SCOPE)
 
